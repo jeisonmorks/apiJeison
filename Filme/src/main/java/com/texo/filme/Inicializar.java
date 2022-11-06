@@ -1,6 +1,8 @@
 package com.texo.filme;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -8,6 +10,9 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
+
+import org.apache.el.stream.Stream;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.sql.init.dependency.DependsOnDatabaseInitialization;
@@ -30,14 +35,14 @@ public class Inicializar {
 		super();
 	}
 
-	@Autowired
+	@PostConstruct
 	public void inicializaBanco() {
 		try {  
-			URL url = this.getClass().getClassLoader().getResource("movielist.csv");
-			if (url == null) {
+			InputStream inputStream = getClass().getResourceAsStream("/movielist.csv");
+			if (inputStream == null) {
 				return ;
 			}
-			try (Reader reader = Files.newBufferedReader(Paths.get(url.toURI()))) {
+			try (Reader reader = new InputStreamReader(inputStream)) {
 				CSVReader csvReader = new CSVReaderBuilder(reader)
 						.withSkipLines(1)//para o caso do CSV ter cabeçalho.
 						.build();
@@ -77,8 +82,6 @@ public class Inicializar {
 					
 					filmeRepository.save(newFilme);
 				}
-			} catch (URISyntaxException e) {
-				e.printStackTrace();
 			}
 		} catch (IOException e) {
 			e.printStackTrace();

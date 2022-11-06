@@ -11,9 +11,11 @@ import java.util.function.Consumer;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -36,7 +38,20 @@ public class FilmeController {
 	@Autowired
 	private FilmeRepository filmeRepository;
 
-	@GetMapping
+	@GetMapping(path = "/{id:[0-9][0-9]*}")
+	public ResponseEntity<Filme> get(@PathVariable("id") Long id) {
+		Optional<Filme> findFilme = getFilme(id);
+		return findFilme.isPresent() ? ResponseEntity.ok(findFilme.get()) : ResponseEntity.notFound().build();
+	}
+	
+	
+	@GetMapping(path = "/todos")
+	public Collection<Filme> buscaTodos() {
+		List<Filme> resultados = filmeRepository.findAll();
+		return resultados;
+	}
+	
+	@GetMapping(path = "/vencedor")
 	public Resultado buscaFilmes() {
 		List<Filme> resultados = filmeRepository.findAll();
 		resultados = resultados.stream().filter((resultado) -> resultado.isVencedor()).toList();

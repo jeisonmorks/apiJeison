@@ -25,7 +25,7 @@ import com.texo.filme.repository.FilmeRepository;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-@AutoConfigureTestDatabase(connection = EmbeddedDatabaseConnection.H2)
+//@AutoConfigureTestDatabase(connection = EmbeddedDatabaseConnection.H2)
 class FilmeApplicationTests {
 
 	private static final String YES = "yes";
@@ -45,7 +45,7 @@ class FilmeApplicationTests {
 	@BeforeAll
 	public void carregaDados() {
 		criaFilme(1980L, "A lagoa azul", "Columbia Pictures", RANDAL_KLEISER, YES);
-		criaFilme(2005L, "S.O.S. do Amor", "Columbia Pictures", RANDAL_KLEISER, YES);
+		criaFilme(1980L, "S.O.S. do Amor", "Columbia Pictures", RANDAL_KLEISER, YES);
 		criaFilme(1971L, "Encurralado", "Universal Studios", STEVEN_SPIELBERG, YES);
 		criaFilme(2022L, "The Fabelmans", "Universal Pictures", STEVEN_SPIELBERG, YES);
 		criaFilme(1987L, "My Best Friend's Birthday", "Super Happy Fun", QUENTIN_TARANTINO, YES);
@@ -67,19 +67,19 @@ class FilmeApplicationTests {
 		HttpEntity<?> httpEntity = new HttpEntity<>(HttpEntity.EMPTY);
 		
 		ResponseEntity<Resultado> response = this.testRestTemplate
-	            .exchange("/filme", HttpMethod.GET, httpEntity, Resultado.class);
+	            .exchange("/filme/vencedor", HttpMethod.GET, httpEntity, Resultado.class);
 		
 		Resultado body = response.getBody();
 		Collection<Vencedor> min = body.getMin();
 		assertFalse(min.isEmpty());
 		for (Vencedor vencedor : min) {
-			assertEquals(vencedor.getProducer(), "Joel Silver");
+			assertEquals(vencedor.getProducer(), RANDAL_KLEISER);
 		}
 
 		Collection<Vencedor> max = body.getMax();
 		assertFalse(max.isEmpty());
 		for (Vencedor vencedor : max) {
-			assertEquals(vencedor.getProducer(), "Matthew Vaughn");
+			assertEquals(vencedor.getProducer(), STEVEN_SPIELBERG);
 		}
 		
 	}
