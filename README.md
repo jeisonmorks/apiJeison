@@ -3,7 +3,7 @@ Fontes API Texo
 
 - O java mais recente deve estar instalado para execução da API
 - Instalar o postman para realizar as requisições para a API
-- Executar o arquivo Filme.bat para iniciar a aplicação
+- Executar o arquivo Filme.bat para iniciar a aplicação. OBS: o arquivo Filme-0.0.1-SNAPSHOT.jar deve estar no mesmo diretório do bat
 - Realizar requisições com os seguintes verbos:
 
 POST usando a url localhost:8080/filme para inserir um filme, passando o seguinte json:
