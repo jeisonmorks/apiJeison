@@ -77,8 +77,7 @@ public class Filme {
 	}
 	
 	public boolean isVencedor() {
-		return this.vencedor != null 
-				&& "yes".equals(this.vencedor);
+		return "yes".equals(this.vencedor);
 	}
 	
 }

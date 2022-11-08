@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -54,11 +56,14 @@ public class FilmeController {
 	@GetMapping(path = "/vencedor")
 	public Resultado buscaFilmes() {
 		List<Filme> resultados = filmeRepository.findAll();
-		resultados = resultados.stream().filter((resultado) -> resultado.isVencedor()).toList();
+		resultados = resultados.stream().filter((resultado) -> resultado.isVencedor()).collect(Collectors.toList());
+		
+		//Ordenar por ano + id para pegar os casos em que o prêmio é inserido fora de ordem
+		resultados.sort((o1, o2) -> getComparePremios(o1, o2));
 		
 		Long menorIntervalo = null;
 		Long maiorIntervalo = null;
-		Map<String, Vencedor> mapVencedores = new HashMap<>();
+		Map<String, Long> mapVencedores = new HashMap<>();
 		Collection<Vencedor> menoresVencedores = new ArrayList<>();
 		Collection<Vencedor> maioresVencedores = new ArrayList<>();
 		for (Iterator<Filme> iterator = resultados.iterator(); iterator.hasNext();) {
@@ -69,14 +74,16 @@ public class FilmeController {
 			String[] listaProdutores = produtores.split(",\\s|\\sand\\s");
 			for (String produtor : listaProdutores) {
 				if (mapVencedores.containsKey(produtor)) {
-					Vencedor vencedor = atualizaVencedor(mapVencedores.get(produtor), ano);
-					Long intervalo = vencedor.getInterval();
+					Long anoAnterior = mapVencedores.get(produtor);
+					Long intervalo = IntervaloUtils.calculaIntervalo(ano, anoAnterior);
+
+					Supplier<Vencedor> retornaVencedor = () -> new Vencedor(produtor, intervalo, anoAnterior, ano);
 					
-					menorIntervalo = verificaMenorIntervalo(menorIntervalo, menoresVencedores, vencedor, intervalo);
-					maiorIntervalo = verificaMaiorIntervalo(maiorIntervalo, maioresVencedores, vencedor, intervalo);
-				} else {
-					mapVencedores.put(produtor, new Vencedor(produtor, ano));
+					menorIntervalo = verificaMenorIntervalo(menorIntervalo, menoresVencedores, retornaVencedor, intervalo);
+					maiorIntervalo = verificaMaiorIntervalo(maiorIntervalo, maioresVencedores, retornaVencedor, intervalo);
 				}
+				
+				mapVencedores.put(produtor, ano);
 			}
 			
 		}
@@ -84,17 +91,12 @@ public class FilmeController {
 		return new Resultado(menoresVencedores, maioresVencedores);
 	}
 
-	/**
-	 * Atualiza as informações do vencedor
-	 * @param mapVencedores
-	 * @param ano
-	 * @return
-	 */
-	private Vencedor atualizaVencedor(Vencedor vencedor, Long ano) {
-		vencedor.setPreviousWin(vencedor.getFollowingWin());
-		vencedor.setFollowingWin(ano);
-		vencedor.setInterval(IntervaloUtils.calculaIntervalo(vencedor.getFollowingWin(), vencedor.getPreviousWin()));
-		return vencedor;
+	private int getComparePremios(Filme o1, Filme o2) {
+		int compare = CompareUtils.compare(o1.getAno(), o2.getAno());
+		if (compare == 0) {
+			compare = CompareUtils.compare(o1.getId(), o2.getId());
+		}
+		return compare;
 	}
 	
 	/**
@@ -105,7 +107,7 @@ public class FilmeController {
 	 * @param intervalo
 	 * @return
 	 */
-	private Long verificaMenorIntervalo(Long menorIntervalo, Collection<Vencedor> menoresVencedores, Vencedor vencedor,
+	private Long verificaMenorIntervalo(Long menorIntervalo, Collection<Vencedor> menoresVencedores, Supplier<Vencedor> retornaVencedor,
 			Long intervalo) {
 		if (menorIntervalo == null) {
 			menorIntervalo = intervalo;
@@ -116,7 +118,7 @@ public class FilmeController {
 				menoresVencedores.clear();
 				menorIntervalo = intervalo;
 			}
-			menoresVencedores.add(vencedor);
+			menoresVencedores.add(retornaVencedor.get());
 		}
 		return menorIntervalo;
 	}
@@ -129,7 +131,7 @@ public class FilmeController {
 	 * @param intervalo
 	 * @return
 	 */
-	private Long verificaMaiorIntervalo(Long maiorIntervalo, Collection<Vencedor> maioresVencedores, Vencedor vencedor,
+	private Long verificaMaiorIntervalo(Long maiorIntervalo, Collection<Vencedor> maioresVencedores, Supplier<Vencedor> retornaVencedor,
 			Long intervalo) {
 		if (maiorIntervalo == null) {
 			maiorIntervalo = intervalo;
@@ -141,7 +143,7 @@ public class FilmeController {
 				maioresVencedores.clear();
 				maiorIntervalo = intervalo;
 			}
-			maioresVencedores.add(vencedor);
+			maioresVencedores.add(retornaVencedor.get());
 		}
 		return maiorIntervalo;
 	}

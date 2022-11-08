@@ -9,9 +9,11 @@ public class Vencedor {
 	private Long previousWin;
 	private Long followingWin;
 
-	public Vencedor(String producer, Long followingWin) {
+	public Vencedor(String producer, Long interval, Long previousWin, Long followingWin) {
 		super();
 		this.producer = producer;
+		this.interval = interval;
+		this.previousWin = previousWin;
 		this.followingWin = followingWin;
 	}
 
