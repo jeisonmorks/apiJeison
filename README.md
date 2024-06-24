@@ -1,5 +1,4 @@
-# desafioTexo
-Fontes API Texo
+Instruções para rodar a API:
 
 - O java mais recente deve estar instalado para execução da API
 - Instalar o postman para realizar as requisições para a API
