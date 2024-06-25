@@ -1,6 +1,6 @@
 Instruções para rodar a API:
 
-- O java mais recente deve estar instalado para execução da API
+- O java 11 ou mais recente deve estar instalado para execução da API
 - Instalar o postman para realizar as requisições para a API
 - Executar o arquivo Filme.bat para iniciar a aplicação. OBS: o arquivo Filme-0.0.1-SNAPSHOT.jar deve estar no mesmo diretório do bat
 - A API foi desenvolvida utilizando-se spring boot, inclusive os testes de integração, então para se executar os testes, basta importar o projeto filme no eclipse e fazer um maven build no projeto, clicando com o botão direito no projeto -> run as -> maven build.
